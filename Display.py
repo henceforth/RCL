@@ -2,7 +2,7 @@ import pygame
 import logging
 import time
 
-logging.basicConfig(level=logging.DEBUG)
+#logging.basicConfig(level=logging.DEBUG, filname="logs/Display.log")
 
 class Display(object):
     logger = None

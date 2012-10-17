@@ -5,6 +5,7 @@ import os
 import urllib2
 import json
 import logging
+#logging.basicConfig(level=logging.DEBUG, filename="logs/Parser.log")
 
 class Parser(object):
     saveFile = "save.json"
@@ -14,6 +15,7 @@ class Parser(object):
     def __init__(self, url):
         self.url = url
         self.logger = logging.getLogger(self.url)
+        self.logger.setLevel(logging.INFO)
         self.logger.info("parser url: %s" % self.url)
 
     def getContent(self):

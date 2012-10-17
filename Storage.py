@@ -1,6 +1,7 @@
 #!/usr/bin/python
 import logging
 import shelve
+#logging.basicConfig(level=logging.DEBUG, filename="logs/Parser.log")
 
 class Storage(object):
 
@@ -11,6 +12,7 @@ class Storage(object):
     def __init__(self, saveFile):
         self.saveFile = saveFile
         self.logger = logging.getLogger(saveFile)
+        self.logger.setLevel(logging.INFO)
         self.logger.info("storage file: %s" % self.saveFile)
         self.database = shelve.open(self.saveFile, writeback=True)
 

@@ -73,9 +73,9 @@ class TextWindow(Window):
     font = None
     currentLine = None
     fontSize = 24 
-    entries = None
+    #entries = None
 
-    def __init__(self, h=1600, w=300):
+    def __init__(self, h=300, w=1600):
         super(TextWindow, self).__init__(h, w)
         self.logger.debug("textwindow, initing pygame font")
         pygame.font.init()
@@ -127,7 +127,7 @@ class TextWindow(Window):
         self.dirty = True
     
     def draw(self):
-        self.logger.debug("drawing")
+        #self.logger.debug("drawing")
         if self.dirty:
             self.render()
 
@@ -136,12 +136,9 @@ class TextWindow(Window):
 class TextMenuWindow(TextWindow):
     currentPosition = -1
 
-    def __init__(self, h=1600, w=300):
+    def __init__(self, h=300, w=1600):
         super(TextMenuWindow, self).__init__(h, w)
         self.logger.debug("textmenuwindow")
-
-    def render(self):
-        pass
 
     def addLine(self, data):
         raise Exception("dont call this method on TextMenuWindow")
@@ -157,9 +154,9 @@ class TextMenuWindow(TextWindow):
             self.logger.debug("rendering menu entry: %s" % entryToRender)
             if self.entries[self.currentPosition] == entryToRender:
                 #highlight selected entry
-                surf = self.font.render(entryToRender.keys()[0], True, (255, 255, 255), (0, 0, 0))
-            else:
                 surf = self.font.render(entryToRender.keys()[0], True, (255, 0, 0), (0, 0, 0))
+            else:
+                surf = self.font.render(entryToRender.keys()[0], True, (255, 255, 255), (0, 0, 0))
             
             currentLine += 1
             self.winSurface.blit(surf, (0, currentLine*self.fontSize))
@@ -176,7 +173,7 @@ class TextMenuWindow(TextWindow):
 
     def moveUp(self):
         self.logger.info("moving up")
-        if self.currentPosition >= len(self.entries)-1:
+        if self.currentPosition <= 0:
             return
         else:
             self.dirty = True
@@ -184,7 +181,7 @@ class TextMenuWindow(TextWindow):
 
     def moveDown(self):
         self.logger.info("moving down")
-        if self.currentPosition <= 0:
+        if self.currentPosition >= len(self.entries)-1:
             return
         else:
             self.dirty = True
@@ -229,6 +226,8 @@ if __name__=="__main__":
 
     tmw1.registerEntry("line1", dummyFunc)
     tmw1.registerEntry("line2", dummyFunc2)
+    tmw1.registerEntry("line3", dummyFunc)
+    tmw1.registerEntry("line4", dummyFunc)
 
     d1.registerWindow(tmw1)
     d1.update()#two windows, 2 entries each
@@ -250,10 +249,13 @@ if __name__=="__main__":
     time.sleep(1)
 
     statusWindow.deleteLines()
-    statusWindow.addLine("selector selected")
+    statusWindow.addLine("4 times moved down")
+    tmw1.moveDown()
+    tmw1.moveDown()
+    tmw1.moveDown()
+    tmw1.moveDown()
 
-    tmw1.select()#dummyfunc2
-    d1.update()#select hit
+    d1.update()#4 times moved down
     time.sleep(1)
 
     d1.update()

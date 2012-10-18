@@ -56,7 +56,7 @@ class Runner(object):
             #render selected in contentWindow
             #save displayed entries
 
-            self.logger.info("dispatching")
+            #self.logger.info("dispatching")
             pygameEventDispatcher.check()
 
             #self.logger.info("sleeping for %f seconds" % self.sleepTime)

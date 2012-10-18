@@ -21,7 +21,7 @@ class PyGameEventDispatcher(InputDispatcher):
     def check(self):
         curEvent = pygame.event.poll()
         while curEvent.type != pygame.NOEVENT:
-            self.logger.debug ("got event: %s" % (curEvent))
+            self.logger.info ("got event: %s" % (curEvent))
             if curEvent.type == pygame.KEYDOWN:
                 if curEvent.key == pygame.K_q:
                     quit()

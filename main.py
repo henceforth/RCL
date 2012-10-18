@@ -3,57 +3,68 @@ import Parser
 import Storage
 import time
 import Display
-import pygame#todo: keyboard handler
+import Dispatcher
 
-logging.basicConfig(level=logging.DEBUG, filename="logs/main.log")
+#logging.basicConfig(level=logging.DEBUG, filename="logs/main.log")
+logging.basicConfig(level=logging.INFO)
 logging.captureWarnings(True)
 
-if __name__ == "__main__":
-    logger = logging.getLogger("main")
+class Runner(object):
+    sleepTime = 0.05
+    rescrapeTime = 30
+    windowRefreshTime = 5
+    logger = None
 
-    redditParser = Parser.Parser("http://www.reddit.com/.json")
-    redditStorage = Storage.RedditStorage("reddit.db")
+    def __init__(self):
+        self.logger = logging.getLogger("runner")
 
-    sleepTime = 0.01
+    def run(self):
+        pygameEventDispatcher = Dispatcher.PyGameEventDispatcher()
+        redditParser = Parser.Parser("http://www.reddit.com/.json")
+        redditStorage = Storage.RedditStorage("reddit.db")
 
-    display = Display.Display()
-    tw1 = Display.TextWindow()
-    display.registerWindow(tw1)
+        display = Display.Display()
+        tw1 = Display.TextWindow()
+        display.registerWindow(tw1)
 
-    run = True
-    lastUpdate = 0
-    while run:
-        #update every 30 seconds
-        if time.time() - lastUpdate > 30:
-            lastUpdate = time.time()
+        run = True
+        lastRedditUpdate = 0
+        lastWindowUpdate = 0
+        data = None
+        while run:
             #get reddit content
-            logger.info("getting reddit content")
-            data = redditParser.getContent()
-            #store entries
-            logger.info("saving content")
-            redditStorage.store(data)
+            if time.time() - lastRedditUpdate > self.rescrapeTime:
+                self.logger.info("getting reddit content")
+                data = redditParser.getContent()
+                #store entries
+                self.logger.info("saving content")
+                redditStorage.store(data)
+                #store update time
+                lastRedditUpdate = data.keys()[0]
 
-        #display entries
-        logger.info("rendering content")
-        tw1.render("text to render")
-        #render selected in contentWindow
-        #update screen
-        logger.info("display content")
-        display.update()
-        #save displayed entries
+            #display entries
+            if time.time() - lastWindowUpdate > self.windowRefreshTime:
+                lastWindowUpdate = time.time()
+                tw1.render("last update: %s" % time.strftime("%c", time.localtime(lastRedditUpdate)))
+                self.logger.info("rendering content")
+                for n in data[lastRedditUpdate]:
+                    tw1.render("%s by %s" % (n["data"]["title"], n["data"]["author"]))
 
-        #check keyboard input
-        curEvent = pygame.event.poll()
-        while curEvent.type != pygame.NOEVENT:
-            print curEvent
-            if curEvent.type == pygame.KEYDOWN:
-                if curEvent.key == pygame.K_q:
-                    run = False
-                    break
-            curEvent = pygame.event.poll()
+                self.logger.info("display content")
+                display.update()
 
-        logger.info("sleeping for %i seconds" % sleepTime)
-        time.sleep(sleepTime)
+            #render selected in contentWindow
+            #save displayed entries
 
-    logger.info("shutting down...")
+            self.logger.info("dispatching")
+            pygameEventDispatcher.check()
 
+            #self.logger.info("sleeping for %f seconds" % self.sleepTime)
+            time.sleep(self.sleepTime)
+
+        self.logger.info("shutting down...")
+
+
+if __name__ == "__main__":
+    r1 = Runner()
+    r1.run()

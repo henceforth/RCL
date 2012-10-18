@@ -59,21 +59,28 @@ class Window(object):
         #return surface
         raise NotImplemented("Window::Draw")
 
+    def clear(self):
+        #reallocates the surface
+        raise NotImplemented("Window::Clear")
+
 class TextWindow(Window):
     fontName = None
     font = None
+    currentLine = None
+    fontSize = 24 
 
     def __init__(self):
         super(TextWindow, self).__init__()
         self.logger.debug("textwindow, initing pygame font")
         pygame.font.init()
 
-        self.fontName = "lat2-16.psfu.gz"
-        self.font = pygame.font.SysFont(self.fontName, 16)
-        self.logger.debug("font found: %s"% self.font)
+        self.fontName = "lat1-16.psfu.gz"
+        self.font = pygame.font.SysFont(self.fontName, self.fontSize)
+        self.logger.info("font found: %s"% self.font)
 
-        self.w = 800
-        self.h = 200
+        self.currentLine = 0
+        self.w = 1600
+        self.h = 800
 
         self.winSurface = pygame.Surface((self.w, self.h))
         self.logger.debug("created textwindow, w: %i, h: %i, font: %s, surface: %s" % (self.w, self.h, self.fontName, self.winSurface))
@@ -81,11 +88,32 @@ class TextWindow(Window):
     def render(self, textToRender):
         self.logger.debug("rendering text: %s" % textToRender)
         surf = self.font.render(textToRender, True, (255, 255, 255), (0, 0, 0))
-        self.winSurface.blit(surf, (0, 0))
+        self.winSurface.blit(surf, (0, self.currentLine*16))
+        self.currentLine += 1
+
+    def clear(self):
+        self.logger.debug("clearing")
+        self.winSurface = pygame.Surface((self.w, self.h))
+        self.currentLine = 0
     
     def draw(self):
         self.logger.debug("drawing")
-        return self.winSurface 
+        retSurface = self.winSurface
+        self.clear()
+        return retSurface
+
+class TextMenu(object):
+    debugger = None
+
+    def __init__(self):
+        self.debugger = logging.getLogger("textMenu")
+
+
+class TextWindowFormatter(object):
+    logger = None
+
+    def __init__(self):
+        self.logger = logging.getLogger("TextWindowFormatter")
 
 
 if __name__=="__main__":

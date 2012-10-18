@@ -8,5 +8,5 @@ git: *.py
 
 clean: 
 	mkdir -p bak
-	cp -f *.log *.db bak/ 
+	cp -f *.json *.log *.db bak/ 
 	rm *.pyc *.log *.db

@@ -10,7 +10,7 @@ import logging
 class Parser(object):
     saveFile = "save.json"
     logger =None
-    forceRefresh = True
+    forceRefresh = False
 
     def __init__(self, url):
         self.url = url

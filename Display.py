@@ -3,7 +3,7 @@ import logging
 import time
 
 #logging.basicConfig(level=logging.DEBUG, filname="logs/Display.log")
-logging.basicConfig(level=logging.DEBUG)
+#logging.basicConfig(level=logging.DEBUG)
 
 class Display(object):
     logger = None
@@ -169,7 +169,7 @@ class TextMenuWindow(TextWindow):
 
         self.logger.debug("registering %s" % entryText)
         self.entries.append({entryText: functionToCall})
-        self.render()
+        self.dirty = True
 
     def moveUp(self):
         self.logger.info("moving up")
@@ -189,7 +189,10 @@ class TextMenuWindow(TextWindow):
 
     def select(self):
         self.logger.info("selected")
-        self.entries[self.currentPosition].values()[0]()
+        functionToCall = self.entries[self.currentPosition].values()[0]
+        self.logger.info("calling %s" % functionToCall)
+        functionToCall()
+
 
 def dummyFunc():
     print "dummyFunc called"

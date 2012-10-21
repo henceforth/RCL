@@ -5,12 +5,15 @@ import os
 import urllib2
 import json
 import logging
+import pydoc
 #logging.basicConfig(level=logging.DEBUG, filename="logs/Parser.log")
 
 class Parser(object):
+    '''parser that allows getting of urls and parsing them from json to actual objects
+    '''
     saveFile = "save.json"
     logger =None
-    forceRefresh = False
+    forceRefresh = True
 
     def __init__(self, url):
         self.url = url
@@ -19,6 +22,7 @@ class Parser(object):
         self.logger.info("parser url: %s" % self.url)
 
     def getContent(self):
+        '''scrapes the url and returns  the resolved json objects'''
         if not os.path.exists(self.saveFile) or self.forceRefresh:
             if self.forceRefresh:
                 self.logger.info("forced refreshing")

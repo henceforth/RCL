@@ -22,7 +22,7 @@ class Parser(object):
         self.logger.info("parser url: %s" % self.url)
 
     def getContent(self):
-        '''scrapes the url and returns  the resolved json objects'''
+        '''scrapes the url and returns the resolved json objects'''
         if not os.path.exists(self.saveFile) or self.forceRefresh:
             if self.forceRefresh:
                 self.logger.info("forced refreshing")

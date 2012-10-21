@@ -24,10 +24,16 @@ class Storage(object):
     def __del__(self):
         self.database.close()
 
+    def sync(self):
+        '''wrapper method to sync entries with the database'''
+        self.database.sync()
+
     def store(self, data):
+        '''must be overridden by implementation to support storage of data'''
         raise Exception("NOT IMPLEMENTED")
 
     def get(self, key):
+        '''must be overridden by implementation to support getting of data'''
         raise Exception("NOT IMPLEMENTED")
 
 

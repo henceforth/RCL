@@ -1,5 +1,6 @@
 import logging
-logging.basicConfig(level=logging.INFO, filename="logs/main.log")
+#logging.basicConfig(level=logging.INFO, filename="logs/main.log")
+logging.basicConfig(level=logging.DEBUG, filename="logs/main.log")
 logging.captureWarnings(True)
 
 import urllib2
@@ -32,7 +33,7 @@ class Runner(object):
         '''callback for loading reddit posts if accept is called in the text menu
         '''
         redditPost = self.storage.get(redditPostId)
-        self.logger.info("calling %s" % redditPost["url"])
+        self.logger.debug("calling %s" % redditPost["url"])
 
         if redditPost["url"].split(".")[-1] in ("jpg", "gif", "png", "bmp", "tif"):
             pictureToRender = None
@@ -42,10 +43,9 @@ class Runner(object):
                 request.add_header("User-agent", "have no fear, rscrape by /u/hcf is here")
                 response = urllib2.urlopen(request)
                 redditPost["xx-buffer"] = response.read()
-                print(type(redditPost))
                 self.storage.sync()
             else:
-                self.logger.info("loading picture from buffer")
+                self.logger.debug("loading picture from buffer")
 
             pictureToRender = StringIO.StringIO(redditPost["xx-buffer"])
             windowHandle.add(pictureToRender)
@@ -67,11 +67,11 @@ class Runner(object):
         #create display and window
         display = Display.Display()
         tw1 = Display.TextWindow(16, 1280)
-        tmw1 = Display.TextMenuWindow(435, 1280)
+        tmw1 = Display.TextMenuWindow(200, 1280)
         pw1 = Display.PictureWindow(800, 1280)
 
         #register windows
-        display.registerWindow(tw1)
+        #display.registerWindow(tw1)
         display.registerWindow(tmw1)
         display.registerWindow(pw1)
 
@@ -88,7 +88,7 @@ class Runner(object):
         #buffer to pass between scraper and storage
         data = None
         #flag for new entries
-        dirty = False
+        dirty = True
 
         while self.run:
             #get reddit content
@@ -97,11 +97,13 @@ class Runner(object):
                 data = redditParser.getContent()
                 #store entries
                 self.logger.debug("saving content")
-                redditStorage.store(data)
+                new = redditStorage.store(data)
                 #store update time
                 #lastRedditUpdate = data.keys()[0]
                 lastRedditUpdate = time.time()
-                dirty = True #todo: dirty nur wenn storage neu eintaege meldet
+                if new > 0:
+                    self.logger.debug("found new entries, refresh")
+                    dirty = True 
 
             #display entries
             if dirty:
@@ -111,8 +113,14 @@ class Runner(object):
 
                 self.logger.debug("rendering content")
                 tmw1.deleteLines()
+                i = 0
                 for n in data[data.keys()[0]]:
-                    tmw1.registerEntry("    %s by %s" % (n["data"]["title"], n["data"]["author"]), self.openLink , n["data"]["id"], pw1)
+                    i += 1
+                    title = n["data"]["title"]
+                    author = n["data"]["author"]
+                    postId = n["data"]["id"]
+                    lineString =" %i - %s by %s" % (i, title, author)
+                    tmw1.registerEntry(lineString, self.openLink, postId, pw1)
 
                 self.logger.debug("display content")
                 dirty = False

@@ -52,14 +52,15 @@ class RedditStorage(Storage):
         old = 0
         for n in entryArray:
             if not self.database.has_key(str(n["data"]["id"])):
-                self.logger.debug( "ADDING: %s" % (n["data"]["title"]))
+                #self.logger.debug( "ADDING: %s" % (n["data"]["title"]))
                 self.database[str(n["data"]["id"])] = n["data"]
                 new += 1
             else:
-                self.logger.debug( "EXISTS: %s" % (n["data"]["title"]))
+                #self.logger.debug( "EXISTS: %s" % (n["data"]["title"]))
                 old += 1
 
         self.logger.info("added %i new entries, %i were old, total %i" % (new, old, len(self.database)))
+        return new
 
     def get(self, redditPostId):
         self.logger.debug("getting key %s" % redditPostId)

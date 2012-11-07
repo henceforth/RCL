@@ -18,7 +18,7 @@ class FunctionCallObject(object):
             for n in args:
                 self.argList.append(n)
 
-        self.logger.debug("created entry for %s, %i arguments" % (functionToCall, len(args)))
+        #self.logger.debug("created entry for %s, %i arguments" % (functionToCall, len(args)))
 
     def __call__(self, *args):
         '''the args provided for this function will not be used here

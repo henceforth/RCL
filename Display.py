@@ -40,9 +40,10 @@ class Display(object):
         self.logger.debug("register window #%i" % window.wId)
 
     def update(self):
-        '''called once per tick, to update all registered window'''
+        '''called once per tick, clears the display buffer updates all registered window'''
         #self.logger.debug("updating %i windows" % len(self.windowList))
         posy = 0
+        pygame.display.get_surface().fill((0, 0, 0))
         for n in self.windowList:
             pygame.display.get_surface().blit(n.draw(), (0, posy))
             posy += n.h
@@ -81,6 +82,7 @@ class Window(object):
         '''resets the window's surface the line counter
         '''
         self.logger.debug("clearing")
+        del self.winSurface
         self.winSurface = pygame.Surface((self.w, self.h))
         self.currentLine = 0
         self.dirty = True
@@ -88,6 +90,7 @@ class Window(object):
     def draw(self):
         '''
         refreshes the surface if the window is dirty
+        then returns the surface
         '''
         #self.logger.debug("drawing")
         if self.dirty:
@@ -147,10 +150,22 @@ class PictureWindow(Window):
 
     def render(self):
         if self.dirty:
-            self.clear()
             self.logger.debug("attempting to load %s" % self.fileName)
-            image = pygame.image.load(self.fileName)
-            self.winSurface.blit(image, pygame.Rect(0, 0, 100, 100))
+            image = pygame.image.load(self.fileName).convert()
+            self.logger.debug("image loaded: %ix%i" % (image.get_width(), image.get_height()))
+
+            self.clear()
+            if image.get_height() > self.h:
+                self.logger.debug("scaling image h")
+                self.winSurface = pygame.transform.scale(image, (self.w*self.h/image.get_height(), self.h))
+            else:
+                self.winSurface.blit(image, (0, 0))
+
+            #needless
+            #if image.get_width() > self.w:
+            #    self.logger.debug("scaling image w")
+            #    self.winSurface = pygame.transform.scale(image, (self.winSurface.get_width()/self.w, self.h))
+
             self.dirty = False
 
 
@@ -217,10 +232,11 @@ class TextMenuWindow(TextWindow):
     so lines can be selected like a menu
     '''
     currentPosition = -1
+    scrollFactor = 0
 
     def __init__(self, h=300, w=1600):
         super(TextMenuWindow, self).__init__(h, w)
-        self.logger.debug("textmenuwindow")
+        self.logger.debug("TextMenuWindow%i", self.wId)
 
     def addLine(self, data):
         raise Exception("dont call this method on TextMenuWindow")
@@ -233,8 +249,9 @@ class TextMenuWindow(TextWindow):
             return
         
         currentLine = 0
+        tmpSurface = pygame.Surface((self.winSurface.get_width(), self.winSurface.get_height()))
         for entryToRender in self.entries:
-            self.logger.debug("rendering menu entry: %s" % entryToRender)
+            #self.logger.debug("rendering menu entry: %s" % entryToRender)
             if self.entries[self.currentPosition] == entryToRender:
                 #highlight selected entry
                 surf = self.font.render(entryToRender.keys()[0], True, (255, 0, 0), (0, 0, 0))
@@ -242,8 +259,14 @@ class TextMenuWindow(TextWindow):
                 surf = self.font.render(entryToRender.keys()[0], True, (255, 255, 255), (0, 0, 0))
             
             currentLine += 1
-            self.winSurface.blit(surf, (0, currentLine*self.fontSize))
+            #self.winSurface.blit(surf, (0, currentLine*self.fontSize))
+            tmpSurface.blit(surf, (0, currentLine*self.fontSize))
+
+        tmpSurface.scroll(0, self.scrollFactor)
+        self.winSurface.fill((0, 0, 0))
+        self.winSurface.blit(tmpSurface, (0, 0))
         self.dirty = False
+        self.logger.debug("rendered %i entries" % len(self.entries))
 
     def add(*args):
         self.registerEntry(*args)
@@ -273,7 +296,7 @@ class TextMenuWindow(TextWindow):
                 fCallList = n.values()[0]
                 if entryText == eName:
                     fCallList.append(FunctionCallObject(functionToCall, *argumentList))
-                    self.logger.debug("now %i callbacks for %s" % (len(fCallList), eName))
+                    #self.logger.debug("now %i callbacks for %s" % (len(fCallList), eName))
         else:
             #entryText is new
             if len(argumentList) == 0:
@@ -288,6 +311,7 @@ class TextMenuWindow(TextWindow):
 
     def moveUp(self):
         self.logger.debug("moving up")
+        self.scrollUp()
         if self.currentPosition <= 0:
             return
         else:
@@ -296,11 +320,23 @@ class TextMenuWindow(TextWindow):
 
     def moveDown(self):
         self.logger.debug("moving down")
+        self.scrollDown()
         if self.currentPosition >= len(self.entries)-1:
             return
         else:
             self.dirty = True
             self.currentPosition += 1
+
+    def scrollDown(self):
+        self.logger.debug("scrolling down")
+        self.clear()
+        #self.winSurface.scroll(0, 10)
+        self.scrollFactor -= 10
+
+    def scrollUp(self):
+        self.logger.debug("scrolling up")
+        self.clear()
+        self.scrollFactor += 10
 
     def select(self):
         self.logger.debug("selected")

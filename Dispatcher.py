@@ -46,7 +46,7 @@ class Dispatcher(object):
             self.entries.append({key: [FunctionCallObject(functionToCall)]})
 
 class PyGameEventDispatcher(Dispatcher):
-    '''dericate of EventDispatcher for checking
+    '''derivate of EventDispatcher for checking
     the pygame event queue for keyboard events
     '''
 
@@ -57,11 +57,11 @@ class PyGameEventDispatcher(Dispatcher):
     def check(self):
         events = pygame.event.get()
         for curEvent in events:
-            self.logger.debug("got event: %s" % (curEvent))
+            #self.logger.debug("got event: %s" % (curEvent))
             if curEvent.type == pygame.KEYDOWN:
                 funcToCallList = self.getCallback(curEvent.key)
                 if funcToCallList != None:
-                    self.logger.debug("calling callback for %s" % curEvent.key)
+                    self.logger.debug("calling callbacks for key %s" % curEvent.key)
                     for n in funcToCallList:
                         n()
 

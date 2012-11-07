@@ -48,9 +48,12 @@ class Parser(object):
         entries = jsonObj["data"]["children"]
 
         i = 0
-        for n in entries:
-            i+=1
-            self.logger.debug( "%i: %s by %s at %s" % (i, n["data"]["title"], n["data"]["author"], n["data"]["created_utc"]))
+
+        #for n in entries:
+            #i+=1
+            #self.logger.debug( "%i: %s by %s at %s" % (i, n["data"]["title"], n["data"]["author"], n["data"]["created_utc"]))
+                
+        self.logger.debug("got %i objects" % len(jsonObj["data"]["children"]))
 
         #return entries packed with a time stamp
         return {time.time() : entries}
